@@ -207,7 +207,7 @@ class API:
         self.close()
         return False
 
-            def _get_headers(self) -> Dict[str, str]:
+    def _get_headers(self) -> Dict[str, str]:
         """获取请求头"""
         return {
             "origin": f"https://{self.domain}",
