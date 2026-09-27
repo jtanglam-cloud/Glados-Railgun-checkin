@@ -207,20 +207,19 @@ class API:
         self.close()
         return False
 
-    def _get_headers(self) -> Dict[str, str]:
-    """获取请求头"""
-    return {
-        "origin": f"https://{self.domain}",
-        "referer": f"https://{self.domain}/console/checkin",
-        "accept": "application/json, text/plain, */*",
-        "accept-language": "zh-CN,zh;q=0.9,en;q=0.8",
-        "content-type": "application/json",
-        "user-agent": (
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/131.0.0.0 Safari/537.36"
-        ),
-    },
+        def _get_headers(self) -> Dict[str, str]:
+        """获取请求头"""
+        return {
+            "origin": f"https://{self.domain}",
+            "referer": f"https://{self.domain}/console/checkin",
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "zh-CN,zh;q=0.9,en;q=0.8",
+            "content-type": "application/json",
+            "user-agent": (
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/131.0.0.0 Safari/537.36"
+            ),
         }
 
     def _log(self, level: str, emoji: str, message: str, force: bool = False) -> None:
