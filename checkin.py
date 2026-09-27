@@ -208,10 +208,19 @@ class API:
         return False
 
     def _get_headers(self) -> Dict[str, str]:
-        """获取请求头"""
-        return {
-            "origin": f"https://{self.domain}",
-            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36",
+    """获取请求头"""
+    return {
+        "origin": f"https://{self.domain}",
+        "referer": f"https://{self.domain}/console/checkin",
+        "accept": "application/json, text/plain, */*",
+        "accept-language": "zh-CN,zh;q=0.9,en;q=0.8",
+        "content-type": "application/json",
+        "user-agent": (
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/131.0.0.0 Safari/537.36"
+        ),
+    },
         }
 
     def _log(self, level: str, emoji: str, message: str, force: bool = False) -> None:
@@ -426,6 +435,10 @@ class Checker:
             logger.info(f"{LogEmoji.COOKIE}[{cookie_idx}] {LogEmoji.DOMAIN}[{domain}] {emoji} {message}")
 
     def checkin_all(self):
+    # 全部跑完后，只要有一个失败就退出码非 0
+    fail_count = sum(1 for r in self.results if r.code == CheckinStatus.FAILURE)
+    if fail_count > 0:
+        raise RuntimeError(f"{fail_count} 个任务签到失败，详情见上方日志")
         """执行所有签到任务"""
         cookie_count = len(self.config.cookies_list)
         domain_count = len(self.config.DOMAINS)
