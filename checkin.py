@@ -240,102 +240,102 @@ class API:
         return f"https://{self.domain}{path}"
 
     def _make_request(self, url: str, method: str, data: Optional[Dict] = None, cookies: str = "") -> Optional[requests.Response]:
-    """发送 HTTP 请求，遇到 429/5xx 自动重试"""
-    session_headers = self.headers.copy()
-    session_headers["cookie"] = cookies
-
-    max_retries = 3
-
-    for attempt in range(1, max_retries + 1):
-        try:
-            if method.upper() == "POST":
-                response = self.session.post(
-                    url,
-                    headers=session_headers,
-                    data=data,
-                    timeout=(60, 120)
-                )
-
-            elif method.upper() == "GET":
-                response = self.session.get(
-                    url,
-                    headers=session_headers,
-                    timeout=(60, 120)
-                )
-
-            else:
-                self._log(
-                    "error",
-                    LogEmoji.ERROR,
-                    f"不支持的 HTTP 方法: {method}",
-                    force=True
-                )
-                return None
-
-            # 请求成功
-            if response.ok:
-                return response
-
-            # 429 或服务器 5xx：自动重试
-            if response.status_code == 429 or response.status_code >= 500:
-                if attempt < max_retries:
-                    wait_time = 60
-
-                    # 如果服务器提供 Retry-After，就优先使用
-                    retry_after = response.headers.get("Retry-After")
-                    if retry_after:
-                        try:
-                            wait_time = max(1, int(retry_after))
-                        except ValueError:
-                            pass
-
+        """发送 HTTP 请求，遇到 429/5xx 自动重试"""
+        session_headers = self.headers.copy()
+        session_headers["cookie"] = cookies
+    
+        max_retries = 3
+    
+        for attempt in range(1, max_retries + 1):
+            try:
+                if method.upper() == "POST":
+                    response = self.session.post(
+                        url,
+                        headers=session_headers,
+                        data=data,
+                        timeout=(60, 120)
+                    )
+    
+                elif method.upper() == "GET":
+                    response = self.session.get(
+                        url,
+                        headers=session_headers,
+                        timeout=(60, 120)
+                    )
+    
+                else:
                     self._log(
-                        "warning",
-                        LogEmoji.WARNING,
-                        f"请求返回 {response.status_code}，"
-                        f"第 {attempt}/{max_retries} 次失败，"
-                        f"{wait_time} 秒后重试...",
+                        "error",
+                        LogEmoji.ERROR,
+                        f"不支持的 HTTP 方法: {method}",
                         force=True
                     )
-
-                    time.sleep(wait_time)
-                    continue
-
-            # 其他错误不重试
-            self._log(
-                "warning",
-                LogEmoji.WARNING,
-                f"向 {url} 发起的请求失败，状态码 "
-                f"{response.status_code}。响应内容: {response.text}",
-                force=True
-            )
-            return None
-
-        except requests.exceptions.RequestException as e:
-            if attempt < max_retries:
-                wait_time = 60
-
+                    return None
+    
+                # 请求成功
+                if response.ok:
+                    return response
+    
+                # 429 或服务器 5xx：自动重试
+                if response.status_code == 429 or response.status_code >= 500:
+                    if attempt < max_retries:
+                        wait_time = 60
+    
+                        # 如果服务器提供 Retry-After，就优先使用
+                        retry_after = response.headers.get("Retry-After")
+                        if retry_after:
+                            try:
+                                wait_time = max(1, int(retry_after))
+                            except ValueError:
+                                pass
+    
+                        self._log(
+                            "warning",
+                            LogEmoji.WARNING,
+                            f"请求返回 {response.status_code}，"
+                            f"第 {attempt}/{max_retries} 次失败，"
+                            f"{wait_time} 秒后重试...",
+                            force=True
+                        )
+    
+                        time.sleep(wait_time)
+                        continue
+    
+                # 其他错误不重试
                 self._log(
                     "warning",
                     LogEmoji.WARNING,
-                    f"网络请求失败，第 {attempt}/{max_retries} 次，"
-                    f"{wait_time} 秒后重试: {e}",
+                    f"向 {url} 发起的请求失败，状态码 "
+                    f"{response.status_code}。响应内容: {response.text}",
                     force=True
                 )
-
-                time.sleep(wait_time)
-                continue
-
-            self._log(
-                "error",
-                LogEmoji.ERROR,
-                f"向 {url} 发起请求时发生网络错误: {e}",
-                force=True
-            )
-
-            return None
-
-    return None
+                return None
+    
+            except requests.exceptions.RequestException as e:
+                if attempt < max_retries:
+                    wait_time = 60
+    
+                    self._log(
+                        "warning",
+                        LogEmoji.WARNING,
+                        f"网络请求失败，第 {attempt}/{max_retries} 次，"
+                        f"{wait_time} 秒后重试: {e}",
+                        force=True
+                    )
+    
+                    time.sleep(wait_time)
+                    continue
+    
+                self._log(
+                    "error",
+                    LogEmoji.ERROR,
+                    f"向 {url} 发起请求时发生网络错误: {e}",
+                    force=True
+                )
+    
+                return None
+    
+        return None
 
     def _get_checkin_data(self) -> Dict[str, str]:
         """获取签到数据"""
