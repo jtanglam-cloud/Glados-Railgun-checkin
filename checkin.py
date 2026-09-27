@@ -207,7 +207,7 @@ class API:
         self.close()
         return False
 
-        def _get_headers(self) -> Dict[str, str]:
+            def _get_headers(self) -> Dict[str, str]:
         """获取请求头"""
         return {
             "origin": f"https://{self.domain}",
@@ -221,7 +221,6 @@ class API:
                 "Chrome/131.0.0.0 Safari/537.36"
             ),
         }
-
     def _log(self, level: str, emoji: str, message: str, force: bool = False) -> None:
         """统一日志输出方法"""
 
