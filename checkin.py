@@ -432,36 +432,37 @@ class Checker:
         if self.config.verbose or force:
             logger.info(f"{LogEmoji.COOKIE}[{cookie_idx}] {LogEmoji.DOMAIN}[{domain}] {emoji} {message}")
 
-    def checkin_all(self):
-    # 全部跑完后，只要有一个失败就退出码非 0
-    fail_count = sum(1 for r in self.results if r.code == CheckinStatus.FAILURE)
-    if fail_count > 0:
-        raise RuntimeError(f"{fail_count} 个任务签到失败，详情见上方日志")
-        """执行所有签到任务"""
-        cookie_count = len(self.config.cookies_list)
-        domain_count = len(self.config.DOMAINS)
-        total_tasks = cookie_count * domain_count
-        task_idx = 0
-
-        logger.info(f"{LogEmoji.INFO} 共 {cookie_count} 个 Cookie, {domain_count} 个域名, 共 {total_tasks} 个任务")
-
-        for cookie_idx, cookie in enumerate(self.config.cookies_list, 1):
-            logger.info(f"{LogEmoji.START} ========== 开始处理 Cookie {cookie_idx} ==========")
-
-            for domain in self.config.DOMAINS:
-                task_idx += 1
-                logger.info(f"{LogEmoji.INFO} ----- 任务 {task_idx}/{total_tasks}: {LogEmoji.COOKIE}[{cookie_idx}] on {LogEmoji.DOMAIN}[{domain}] -----")
-
-                result = self._checkin_on_domain(cookie, cookie_idx, domain)
-                self.results.append(result)
-
-                result_message = f"结果: {result.status}"
-                if result.code == CheckinStatus.SUCCESS:
-                    if self.config.verbose:
-                        result_message = f"结果: {result.status}, 获得 {result.points} 积分, 剩余 {result.days}, 总 {result.points_total}, {result.exchange}"
-                    self._log(cookie_idx, domain, LogEmoji.SUCCESS, result_message, force=True)
-                else:
-                    self._log(cookie_idx, domain, LogEmoji.WARNING, result_message, force=True)
+                    def checkin_all(self):
+                    """执行所有签到任务"""
+                    cookie_count = len(self.config.cookies_list)
+                    domain_count = len(self.config.DOMAINS)
+                    total_tasks = cookie_count * domain_count
+                    task_idx = 0
+            
+                    logger.info(f"{LogEmoji.INFO} 共 {cookie_count} 个 Cookie, {domain_count} 个域名, 共 {total_tasks} 个任务")
+            
+                    for cookie_idx, cookie in enumerate(self.config.cookies_list, 1):
+                        logger.info(f"{LogEmoji.START} ========== 开始处理 Cookie {cookie_idx} ==========")
+            
+                        for domain in self.config.DOMAINS:
+                            task_idx += 1
+                            logger.info(f"{LogEmoji.INFO} ----- 任务 {task_idx}/{total_tasks}: {LogEmoji.COOKIE}[{cookie_idx}] on {LogEmoji.DOMAIN}[{domain}] -----")
+            
+                            result = self._checkin_on_domain(cookie, cookie_idx, domain)
+                            self.results.append(result)
+            
+                            result_message = f"结果: {result.status}"
+                            if result.code == CheckinStatus.SUCCESS:
+                                if self.config.verbose:
+                                    result_message = f"结果: {result.status}, 获得 {result.points} 积分, 剩余 {result.days}, 总 {result.points_total}, {result.exchange}"
+                                self._log(cookie_idx, domain, LogEmoji.SUCCESS, result_message, force=True)
+                            else:
+                                self._log(cookie_idx, domain, LogEmoji.WARNING, result_message, force=True)
+            
+                    # 全部跑完后，只要有一个失败就抛异常让 Actions 变红
+                    fail_count = sum(1 for r in self.results if r.code == CheckinStatus.FAILURE)
+                    if fail_count > 0:
+                        raise RuntimeError(f"{fail_count} 个任务签到失败，请查看上方日志")
 
     def _checkin_on_domain(self, cookie: str, cookie_idx: int, domain: str) -> CheckinResult:
         result = CheckinResult(cookie_idx, domain)
